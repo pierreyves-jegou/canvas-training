@@ -1,6 +1,9 @@
 const canvas = document.getElementById('my-canva');
 const ctx = canvas.getContext("2d");
 
+let posX = null
+let posY = null
+
 function drawCircle(posX, posY) {
     ctx.beginPath();
     ctx.arc(posX, posY, 40, 0, 2 * Math.PI);
@@ -9,10 +12,10 @@ function drawCircle(posX, posY) {
     ctx.fill();
 }
 
-canvas.addEventListener('mousedown', (event) => {
+canvas.addEventListener('mousemove', (event) => {
     console.log(event)
-    let posX = event.x;
-    let posY = event.y;
+    posX = event.x;
+    posY = event.y;
     drawCircle(posX, posY)
 });
 
