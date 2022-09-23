@@ -9,6 +9,12 @@ function drawCircle(posX, posY) {
     ctx.fill();
 }
 
-drawCircle(50, 50)
+canvas.addEventListener('mousedown', (event) => {
+    console.log(event)
+    let posX = event.x;
+    let posY = event.y;
+    drawCircle(posX, posY)
+});
+
 
 
