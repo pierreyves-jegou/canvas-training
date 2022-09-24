@@ -19,6 +19,7 @@ button.addEventListener('click', (event) => {
 });
 
 let particules = [];
+let hue = 0;
 
 class Particule{
     constructor(posX, posY, ctx) {
@@ -28,13 +29,14 @@ class Particule{
         this.size = Math.random() * 5 + 1;
         this.speedX = Math.random() * 3 - 1.5;
         this.speedY = Math.random() * 3 - 1.5;
+        this.color = 'hsl(' + hue + ',100%,50%)';
     }
 
     draw(){
         ctx.beginPath();
         ctx.arc(this.posX, this.posY, this.size, 0, 2 * Math.PI);
         ctx.stroke();
-        ctx.fillStyle = getRndColor();
+        ctx.fillStyle = this.color
         ctx.fill();
 
         function getRndColor() {
@@ -44,9 +46,6 @@ class Particule{
             return 'rgb(' + r + ',' + g + ',' + b + ')';
         }
 
-        function getNextColor(){
-
-        }
 
     }
 
@@ -70,6 +69,7 @@ function initParticules(){
 }
 
 function animate(){
+    hue++;
     for(let particule of particules){
         particule.draw();
         particule.update();
