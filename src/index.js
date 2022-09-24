@@ -26,7 +26,7 @@ class Particule{
         this.posX = posX;
         this.posY = posY;
         this.ctx = ctx;
-        this.size = Math.random() * 5 + 1;
+        this.size = Math.random() * 15 + 1;
         this.speedX = Math.random() * 3 - 1.5;
         this.speedY = Math.random() * 3 - 1.5;
         this.color = 'hsl(' + hue + ',100%,50%)';
@@ -52,6 +52,7 @@ class Particule{
     update(){
         this.posX += this.speedX;
         this.posY += this.speedY;
+        if(this.size > 0.2) this.size -= 0.1;
     }
 }
 
