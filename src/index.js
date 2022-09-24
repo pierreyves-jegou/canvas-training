@@ -71,9 +71,13 @@ function initParticules(){
 
 function animate(){
     hue++;
-    for(let particule of particules){
-        particule.draw();
-        particule.update();
+    for(let i=0; i < particules.length; i++){
+        const particle = particules[i];
+        if(particle.size < 1){
+            particules.splice(i, 1);
+        }
+        particle.draw();
+        particle.update();
     }
     requestAnimationFrame(animate)
 }
