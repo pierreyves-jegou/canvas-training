@@ -1,3 +1,4 @@
+import HslColor from "./js/HslColor";
 
 const canvas = document.getElementById('my-canva');
 const ctx = canvas.getContext("2d");
@@ -8,45 +9,29 @@ const mousePosition = {
     posY : null
 }
 
-const currentColor = {
-    red : 0,
-    green : 0,
-    bleu : 0
-}
-
 button.addEventListener('click', (event) => {
     ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight)
 });
 
 let particules = [];
-let hue = 0;
+let hsl_h = 0;
 
 class Particule{
-    constructor(posX, posY, ctx) {
+    constructor(posX, posY) {
         this.posX = posX;
         this.posY = posY;
-        this.ctx = ctx;
         this.size = Math.random() * 15 + 1;
         this.speedX = Math.random() * 3 - 1.5;
         this.speedY = Math.random() * 3 - 1.5;
-        this.color = 'hsl(' + hue + ',100%,50%)';
+        this.color = new HslColor(Math.random() * 359 + 1, 100, 50);
     }
 
     draw(){
         ctx.beginPath();
         ctx.arc(this.posX, this.posY, this.size, 0, 2 * Math.PI);
         ctx.stroke();
-        ctx.fillStyle = this.color
+        ctx.fillStyle = this.color.toColor()
         ctx.fill();
-
-        function getRndColor() {
-            var r = 100*Math.random()|0,
-                g = 100*Math.random()|0,
-                b = 255*Math.random()|0;
-            return 'rgb(' + r + ',' + g + ',' + b + ')';
-        }
-
-
     }
 
     update(){
@@ -65,12 +50,18 @@ canvas.addEventListener('click', (event) => {
 
 function initParticules(){
     for(let i = 0; i < 100; i++){
-        particules.push(new Particule(mousePosition.posX, mousePosition.posY, ctx));
+        const particle = new Particule(mousePosition.posX, mousePosition.posY);
+        if(i > 0){
+            const hslColor = particules[i-1].color;
+            hslColor.increaseH(3);
+            particle.color = new HslColor(hslColor.h, hslColor.s, hslColor.l);
+        }
+        particules.push(particle);
     }
 }
 
 function animate(){
-    hue++;
+    hsl_h++;
     for(let i=0; i < particules.length; i++){
         const particle = particules[i];
         if(particle.size < 1){
