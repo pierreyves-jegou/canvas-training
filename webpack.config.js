@@ -13,5 +13,20 @@ module.exports = {
 
     //default mode is production
     mode: 'development',
-    watch: true
+    watch: true,
+    module: {
+        rules: [
+            {
+                test: /\.(jpe?g|gif|png|svg)$/i,
+                use: [
+                    {
+                        loader: 'url-loader',
+                        options: {
+                            limit: false
+                        }
+                    }
+                ],
+            }
+        ]
+    }
 }
