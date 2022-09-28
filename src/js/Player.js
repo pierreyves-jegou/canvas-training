@@ -8,8 +8,8 @@ import {DynoConstant} from "./movement-player/dyno/DynoConstant";
 
 export class Player {
 
-    constructor(posX, posY, ctx, canvasWidth, canvasHeight) {
-        this.ctx = ctx;
+    constructor(posX, posY, game) {
+        this.ctx = game.ctx;
         this.position = {
             x: posX,
             y: posY
@@ -23,9 +23,9 @@ export class Player {
 
         this.gravity = 9;
         this.jumpDistance = 400;
-        this.canvasWidth = canvasWidth;
-        this.canvasHeight = canvasHeight;
-        this.nextElementPositionUnderFeet = canvasHeight;
+        this.canvasWidth = game.width;
+        this.canvasHeight = game.height;
+        this.nextElementPositionUnderFeet = game.height;
         this.isGoingRigth = new RunRightMouv(false);
         this.isGoingLeft = new RunLeftMouv(false);
         this.isGoingUp = new JumpMouv(false);
@@ -51,19 +51,19 @@ export class Player {
         this.ctx.fill()
     }
 
-    getRightXPosition() {
+    getRightPosition() {
         return this.position.x + this.width;
     }
 
-    getLeftXPosition() {
+    getLeftPosition() {
         return this.position.x;
     }
 
-    getTopYPosition() {
+    getTopPosition() {
         return this.position.y - this.height;
     }
 
-    getBottomYPosition() {
+    getBottomPosition() {
         return this.position.y;
     }
 
@@ -80,7 +80,7 @@ export class Player {
     }
 
     update() {
-        if (this.isGoingRigth.isOnGoing && (this.getRightXPosition() + this.velocity.x < this.canvasWidth)) {
+        if (this.isGoingRigth.isOnGoing && (this.getRightPosition() + this.velocity.x < this.canvasWidth)) {
             this.position.x += this.velocity.x;
         }
 
@@ -88,7 +88,7 @@ export class Player {
             this.position.x -= this.velocity.x;
         }
 
-        if (this.getBottomYPosition() + this.gravity < this.nextElementPositionUnderFeet) {
+        if (this.getBottomPosition() + this.gravity < this.nextElementPositionUnderFeet) {
             this.position.y += this.gravity;
         } else {
             this.position.y = this.nextElementPositionUnderFeet;
