@@ -9,7 +9,7 @@ export class IncrementUtil {
 
     static decreaseRolling(currentValue, decrement, maxValue, minValue = 0){
         if(decrement >= maxValue - minValue){
-            throw new Error('The decrement value is bigger than maxValue - minValue')
+            return currentValue;
         }
 
         if(currentValue - decrement <= minValue){
@@ -26,8 +26,8 @@ export class IncrementUtil {
     }
 
     static increaseRolling(currentValue, increment, maxValue, minValue = 0){
-        if(increment >= maxValue - minValue){
-            throw new Error('The increment value is bigger than maxValue - minValue')
+        if(increment > maxValue - minValue){
+            return currentValue;
         }
         if(currentValue + increment <= maxValue){
             return currentValue + increment;

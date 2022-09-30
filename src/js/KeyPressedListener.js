@@ -24,6 +24,8 @@ export class KeyPressedListener {
         const ind = this.activeKeys.indexOf(key);
         if(ind !== -1){
             this.activeKeys.splice(ind, 1);
+            const event = new CustomEvent('KeyPressed', { detail : this.activeKeys });
+            window.dispatchEvent(event);
         }
     }
 
@@ -49,7 +51,6 @@ export class KeyPressedListener {
 
     #handleKeyDown() {
         window.addEventListener('keydown', ({keyCode}) => {
-            console.log(keyCode)
             switch (keyCode) {
                 case 39:
                     // RIGHT

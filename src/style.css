@@ -2,9 +2,9 @@
     margin: 0;
 }
 
-/*#my-canva {*/
-/*    box-sizing: border-box;*/
-/*    -moz-box-sizing: border-box;*/
-/*    -webkit-box-sizing: border-box;*/
-/*    border: blue solid;*/
-/*}*/
+#my-canva {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    border: blue solid;
+}

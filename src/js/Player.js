@@ -1,54 +1,83 @@
-import HslColor from "./HslColor";
-import {RunRightMouv} from "./movement-player/dyno/RunRightMouv";
-import {RunLeftMouv} from "./movement-player/dyno/RunLeftMouv";
-import {JumpMouv} from "./movement-player/dyno/JumpMouv";
-import {IdleMouv} from "./movement-player/dyno/IdleMouv";
+import {RunMoveRight} from "./movement-player/dyno/RunMoveRight";
+import {RunMoveLeft} from "./movement-player/dyno/RunMoveLeft";
+import {JumpMoveRight} from "./movement-player/dyno/JumpMoveRight";
+import {IdleMoveRight} from "./movement-player/dyno/IdleMoveRight";
 import {DynoConstant} from "./movement-player/dyno/DynoConstant";
+import {states} from "./movement-player/PlayerMovment";
+import {IdleMoveLeft} from "./movement-player/dyno/IdleMoveLeft";
 
+import sprint_dyno from "../image/dyno_sprit/sprint_dyno.png"
+import {ImageSource} from "./utils/ImageSource";
+import {SitDownRight} from "./movement-player/dyno/SitDownRight";
+import {JumpMoveLeft} from "./movement-player/dyno/JumpMoveLeft";
+import {SitDownIdleRight} from "./movement-player/dyno/SitDownIdleRight";
+import {SitDownIdleLeft} from "./movement-player/dyno/SitDownIdleLeft";
+import {SitDownLeft} from "./movement-player/dyno/SitDownLeft";
+
+const debug = true;
 
 export class Player {
 
+    static imgSrc = ImageSource.createImage(sprint_dyno);
+
     constructor(posX, posY, game) {
         this.ctx = game.ctx;
-        this.position = {
-            x: posX,
-            y: posY
-        }
+        this.position = { x: posX, y: posY }
         this.width = DynoConstant.dynoWidth;
         this.height = DynoConstant.dynoHeight;
-        this.velocity = {
-            x: 10,
-            y: 0
-        }
+        this.velocity = { x: 0, y: 0 }
+        this.game = game;
+        this.gravity = 1;
+        //this.playerMovingXBoundary = {minX : 100, maxX: 1000}
+        this.playerMovingXBoundary = {minX : 0, maxX: game.width}
 
-        this.gravity = 9;
-        this.jumpDistance = 400;
-        this.canvasWidth = game.width;
-        this.canvasHeight = game.height;
-        this.nextElementPositionUnderFeet = game.height;
-        this.isGoingRigth = new RunRightMouv(false);
-        this.isGoingLeft = new RunLeftMouv(false);
-        this.isGoingUp = new JumpMouv(false);
-        this.idle = new IdleMouv(true);
-    }
-
-    detectCurrentMouv() {
-        if (this.isGoingRigth.isOnGoing) {
-            return this.isGoingRigth;
-        } else if (this.isGoingLeft.isOnGoing) {
-            return this.isGoingLeft;
-        } else if (this.isGoingUp.isOnGoing) {
-            return this.isGoingUp;
-        } else {
-            return this.idle;
-        }
+        this.states = [new IdleMoveRight(this, true), new IdleMoveLeft(this, false),
+            new RunMoveRight(this, false), new RunMoveLeft(this, false),
+            new JumpMoveRight(this, false), new JumpMoveLeft(this, false),
+            new SitDownRight(this, false), new SitDownLeft(this, false),
+            new SitDownIdleRight(this, false), new SitDownIdleLeft(this, false)
+        ];
+        this.setState(states.IDLE_RIGHT);
     }
 
     draw() {
-        let currentMouv = this.detectCurrentMouv();
-        let currentImg = currentMouv.currentMovement();
-        this.ctx.drawImage(currentImg, this.position.x, this.position.y - DynoConstant.dynoHeight - 30);
-        this.ctx.fill()
+        this.ctx.drawImage(
+            Player.imgSrc,
+            this.currentState.sprite.currentSprite * DynoConstant.dynoWidth,
+            this.currentState.sprite.spriteHeight * DynoConstant.dynoHeight,
+            DynoConstant.dynoWidth,
+            DynoConstant.dynoHeight,
+            this.position.x,
+            this.position.y - DynoConstant.dynoHeight,
+            DynoConstant.dynoWidth,
+            DynoConstant.dynoHeight
+        )
+
+        if(debug){
+            this.ctx.beginPath();
+            this.ctx.lineWidth = "1";
+            this.ctx.strokeStyle = "red";
+            this.ctx.rect(this.position.x, this.position.y - this.height, this.width, this.height);
+            this.ctx.stroke();
+        }
+    }
+
+    update() {
+        this.currentState.update();
+        if((this.velocity.x > 0 && this.position.x < this.playerMovingXBoundary.maxX)
+            || this.velocity.x < 0 && this.position.x > this.playerMovingXBoundary.minX){
+            this.position.x += this.velocity.x;
+        }else{
+            this.velocity.x = 0;
+        }
+
+        this.position.y += this.velocity.y;
+        if (!this.onGround()) {
+            this.velocity.y += this.gravity;
+        } else {
+            this.velocity.y = 0;
+        }
+
     }
 
     getRightPosition() {
@@ -67,35 +96,22 @@ export class Player {
         return this.position.y;
     }
 
-    goUp() {
-        if (!this.isGoingUp.isOnGoing) {
-            this.position.y -= this.jumpDistance;
-            this.isGoingUp.isOnGoing = true;
-            console.log('isGoingUp')
-        }
-    }
-
     setNextElementPositionUnderFeet(posY) {
         this.nextElementPositionUnderFeet = posY;
     }
 
-    update() {
-        if (this.isGoingRigth.isOnGoing && (this.getRightPosition() + this.velocity.x < this.canvasWidth)) {
-            this.position.x += this.velocity.x;
-        }
-
-        if (this.isGoingLeft.isOnGoing && (this.position.x - this.velocity.x > 0)) {
-            this.position.x -= this.velocity.x;
-        }
-
-        if (this.getBottomPosition() + this.gravity < this.nextElementPositionUnderFeet) {
-            this.position.y += this.gravity;
-        } else {
-            this.position.y = this.nextElementPositionUnderFeet;
-            this.isGoingUp.isOnGoing = false;
-        }
-
-        let currentMouv = this.detectCurrentMouv();
-        currentMouv.nextMovement();
+    onGround() {
+        return this.getTopPosition() >= this.game.height - this.height;
     }
+
+    setState(state) {
+        if (this.currentState != null) {
+            this.currentState.isOnGoing = false;
+        }
+        this.currentState = this.states[state];
+        this.currentState.isOnGoing = true;
+        this.currentState.enter()
+    }
+
+
 }
