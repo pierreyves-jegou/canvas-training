@@ -1,34 +1,26 @@
-import {PlayerMovementMultiImage, states} from "../PlayerMovment";
 import {KeyPressedUtil} from "../../utils/KeyPressedUtil";
 import {keys} from "../../KeyPressedListener";
 import {DynoConstant} from "./DynoConstant";
+import {DynoPlayer, states} from "./DynoPlayer";
 
-export class JumpMoveLeft extends PlayerMovementMultiImage{
+export class JumpMoveLeft extends DynoPlayer{
     constructor(player, isOnGoing) {
         super(player, isOnGoing, 5, 11);
-        this.handleInput();
         this.framesJumping = 0;
     }
 
-
-
-    handleInput() {
-        window.addEventListener('KeyPressed', (event) => {
-                if (this.isOnGoing) {
-                    let keysPressed = event.detail;
-                    console.log('JumpMoveLeft' + keysPressed);
-                    KeyPressedUtil.withExactlyKeys(keysPressed, () => {
-                        console.log('while jumping : ' + this.player.velocity.x)
-                        if(this.player.velocity.x >= 0){
-                                this.player.velocity.x = - DynoConstant.jumpWithoutVelocityMaxVelocity;
-                            }
-                        },
-                        keys.KEY_LEFT);
-                    KeyPressedUtil.withExactlyKeys(keysPressed, () => this.player.setState(states.JUMPING_RIGHT), keys.KEY_RIGHT)
-                    KeyPressedUtil.withExactlyKeys(keysPressed, () => this.player.setState(states.JUMPING_RIGHT), keys.KEY_RIGHT, keys.KEY_UP)
+    handleInput(activesKeys){
+        let nextState = null;
+        KeyPressedUtil.withExactlyKeys(activesKeys, () => {
+                console.log('while jumping : ' + this.player.objectMoving.velocity.x)
+                if(this.player.objectMoving.velocity.x  >= 0){
+                    this.player.objectMoving.velocity.x = - DynoConstant.jumpWithoutVelocityMaxVelocity;
                 }
-            }
-        )
+            },
+            keys.KEY_LEFT);
+        KeyPressedUtil.withExactlyKeys(activesKeys, () => nextState = states.JUMPING_RIGHT, keys.KEY_RIGHT)
+        KeyPressedUtil.withExactlyKeys(activesKeys, () => nextState = states.JUMPING_RIGHT, keys.KEY_RIGHT, keys.KEY_UP)
+        return nextState;
     }
 
     update(){

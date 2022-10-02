@@ -3,7 +3,7 @@ import {RunMoveLeft} from "./movement-player/dyno/RunMoveLeft";
 import {JumpMoveRight} from "./movement-player/dyno/JumpMoveRight";
 import {IdleMoveRight} from "./movement-player/dyno/IdleMoveRight";
 import {DynoConstant} from "./movement-player/dyno/DynoConstant";
-import {states} from "./movement-player/PlayerMovment";
+import {states} from "./movement-player/dyno/DynoPlayer";
 import {IdleMoveLeft} from "./movement-player/dyno/IdleMoveLeft";
 
 import sprint_dyno from "../image/dyno_sprit/sprint_dyno.png"
@@ -13,29 +13,29 @@ import {JumpMoveLeft} from "./movement-player/dyno/JumpMoveLeft";
 import {SitDownIdleRight} from "./movement-player/dyno/SitDownIdleRight";
 import {SitDownIdleLeft} from "./movement-player/dyno/SitDownIdleLeft";
 import {SitDownLeft} from "./movement-player/dyno/SitDownLeft";
+import {GenericObject} from "./GenericObject";
+import {DeadMove} from "./movement-player/dyno/DeadMove";
 
-const debug = true;
-
-export class Player {
+export class Player extends GenericObject{
 
     static imgSrc = ImageSource.createImage(sprint_dyno);
 
     constructor(posX, posY, game) {
-        this.ctx = game.ctx;
-        this.position = { x: posX, y: posY }
-        this.width = DynoConstant.dynoWidth;
-        this.height = DynoConstant.dynoHeight;
-        this.velocity = { x: 0, y: 0 }
-        this.game = game;
+        super(posX, posY, DynoConstant.dynoWidth, DynoConstant.dynoHeight, game)
         this.gravity = 1;
         //this.playerMovingXBoundary = {minX : 100, maxX: 1000}
         this.playerMovingXBoundary = {minX : 0, maxX: game.width}
+        this.activesKeys = [];
+        this.handleInput();
+
+        this.objectMoving = this;
 
         this.states = [new IdleMoveRight(this, true), new IdleMoveLeft(this, false),
             new RunMoveRight(this, false), new RunMoveLeft(this, false),
             new JumpMoveRight(this, false), new JumpMoveLeft(this, false),
             new SitDownRight(this, false), new SitDownLeft(this, false),
-            new SitDownIdleRight(this, false), new SitDownIdleLeft(this, false)
+            new SitDownIdleRight(this, false), new SitDownIdleLeft(this, false),
+            new DeadMove(this, false)
         ];
         this.setState(states.IDLE_RIGHT);
     }
@@ -64,12 +64,61 @@ export class Player {
 
     update() {
         this.currentState.update();
-        if((this.velocity.x > 0 && this.position.x < this.playerMovingXBoundary.maxX)
-            || this.velocity.x < 0 && this.position.x > this.playerMovingXBoundary.minX){
-            this.position.x += this.velocity.x;
-        }else{
+
+
+        if(
+            (this.objectMoving.velocity.x > 0 && this.getRightPosition() >= this.game.scrollingInterval.right) ||
+            (this.objectMoving.velocity.x < 0 && this.getLeftPosition() <= this.game.scrollingInterval.left)
+        ){
+            let currentVelocityX = this.objectMoving.velocity.x;
+            this.objectMoving = this.game;
+            this.objectMoving.velocity.x = currentVelocityX;
             this.velocity.x = 0;
+        }else{
+            let currentVelocityX = this.objectMoving.velocity.x;
+            this.objectMoving = this;
+            this.objectMoving.velocity.x = currentVelocityX;
+            this.game.velocity.x = 0;
         }
+
+
+
+        //
+        // if(this.objectMoving.velocity.x != 0 &&
+        //     (this.getRightPosition() >= this.game.scrollingInterval.right ||
+        //     this.getLeftPosition() <= this.game.scrollingInterval.left
+        //     )){
+        //     let currentVelocityX = this.objectMoving.velocity.x;
+        //     this.objectMoving = this.game;
+        //     this.objectMoving.velocity.x = currentVelocityX;
+        //     this.velocity.x = 0;
+        // }else{
+        //     let currentVelocityX = this.objectMoving.velocity.x;
+        //     this.objectMoving = this;
+        //     this.objectMoving.velocity.x = currentVelocityX;
+        //     this.game.velocity.x = 0;
+        // }
+
+
+        // if(this.objectMoving.velocity.x > 0 && this.getRightPosition() >= this.game.scrollingInterval.right){
+        //     let currentVelocityX = this.objectMoving.velocity.x;
+        //     this.objectMoving = this.game;
+        //     this.objectMoving.velocity.x = currentVelocityX;
+        //     this.velocity.x = 0;
+        // }else if(this.objectMoving.velocity.x < 0 && this.getRightPosition() <= this.game.scrollingInterval.right
+        // && this.getLeftPosition() > this.game.scrollingInterval.left){
+        //     let currentVelocityX = this.objectMoving.velocity.x;
+        //     this.objectMoving = this;
+        //     this.objectMoving.velocity.x = currentVelocityX;
+        //     this.game.velocity.x = 0
+        // }else if(this.objectMoving.velocity.x < 0 && this.getLeftPosition() <= this.game.scrollingInterval.left){
+        //     let currentVelocityX = this.objectMoving.velocity.x;
+        //     this.objectMoving = this.game;
+        //     this.objectMoving.velocity.x = currentVelocityX;
+        //     this.velocity.x = 0;
+        // }
+
+
 
         this.position.y += this.velocity.y;
         if (!this.onGround()) {
@@ -77,31 +126,11 @@ export class Player {
         } else {
             this.velocity.y = 0;
         }
-
-    }
-
-    getRightPosition() {
-        return this.position.x + this.width;
-    }
-
-    getLeftPosition() {
-        return this.position.x;
-    }
-
-    getTopPosition() {
-        return this.position.y - this.height;
-    }
-
-    getBottomPosition() {
-        return this.position.y;
+        this.position.x += this.velocity.x;
     }
 
     setNextElementPositionUnderFeet(posY) {
         this.nextElementPositionUnderFeet = posY;
-    }
-
-    onGround() {
-        return this.getTopPosition() >= this.game.height - this.height;
     }
 
     setState(state) {
@@ -110,8 +139,20 @@ export class Player {
         }
         this.currentState = this.states[state];
         this.currentState.isOnGoing = true;
-        this.currentState.enter()
+        this.currentState.enter();
+        this.currentState.handleInput(this.activesKeys);
     }
 
-
+    handleInput(){
+        window.addEventListener('KeyPressed', (event) => {
+                this.activesKeys = event.detail;
+                if(this.currentState != null){
+                    let nextState = this.currentState.handleInput(this.activesKeys);
+                    if(nextState != null){
+                        this.setState(nextState)
+                    }
+                }
+            }
+        )
+    }
 }

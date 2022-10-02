@@ -6,6 +6,8 @@ export class DynoConstant {
     static runningVelocityX = 10;
     static cactusWidth = 240/2;
     static cactusHeight = 399/2;
+    static plateformWidth = 500;
+    static plateformHeigth = 50;
     static scrollBackgroundRightAt = 300;
     static scrollBackgroundLeftAt = 200;
 }
